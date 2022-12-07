@@ -6,22 +6,28 @@ namespace WinTail
 {
   #region Program
 
-  internal class Program
+  public class Program
   {
     public static ActorSystem MyActorSystem;
 
     private static void Main(string[] args)
     {
       // initialize MyActorSystem
-      // YOU NEED TO FILL IN HERE
       MyActorSystem = ActorSystem.Create("MyActorSystem");
 
-      // time to make your first actors!
-      //YOU NEED TO FILL IN HERE
-      // make consoleWriterActor using these props: Props.Create(() => new ConsoleWriterActor())
-      var consoleWriterActor = MyActorSystem.ActorOf(Props.Create(() => new ConsoleWriterActor()));
-      // make consoleReaderActor using these props: Props.Create(() => new ConsoleReaderActor(consoleWriterActor))
-      var consoleReaderActor = MyActorSystem.ActorOf(Props.Create(() => new ConsoleReaderActor(consoleWriterActor)));
+      // typeof 로 넘기면 compile time 에서 잡아내기 힘듬
+      //Props fakeActorProps = Props.Create(typeof(FakeActor));
+      //IActorRef fakeActor = MyActorSystem.ActorOf(fakeActorProps, "fakeActor");
+
+      //Props consoleWriterProps = Props.Create(typeof(ConsoleWriterActor)); // dont' do
+      Props consoleWriterProps = Props.Create<ConsoleWriterActor>();
+      IActorRef consoleWriterActor = MyActorSystem.ActorOf(consoleWriterProps, "consoleWriterActor");
+
+      Props validationActorProps = Props.Create(() => new ValidationActor(consoleWriterActor));
+      IActorRef validationActor = MyActorSystem.ActorOf(validationActorProps, "validationActor");
+
+      Props consoleReaderProps = Props.Create<ConsoleReaderActor>(validationActor);
+      IActorRef consoleReaderActor = MyActorSystem.ActorOf(consoleReaderProps, "consoleReaderActor");
 
       // tell console reader to begin
       //YOU NEED TO FILL IN HERE
@@ -33,4 +39,6 @@ namespace WinTail
   }
 
   #endregion Program
+
+  public class FakeActor { }
 }

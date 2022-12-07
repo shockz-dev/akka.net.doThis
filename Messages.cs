@@ -1,6 +1,6 @@
 ﻿namespace WinTail
 {
-  internal class Messages
+  public class Messages
   {
     #region Neutral/system messages
 
