@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WinTail": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false
+    }
+  }
+}
