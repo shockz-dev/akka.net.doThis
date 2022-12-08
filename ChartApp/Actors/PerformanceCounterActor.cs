@@ -2,7 +2,6 @@
 
 using Akka.Actor;
 
-
 namespace ChartApp.Actors
 {
   /// <summary>
@@ -30,13 +29,7 @@ namespace ChartApp.Actors
     protected override void PreStart()
     {
       _counter = _performanceCounterGenerator();
-      Context.System.Scheduler.ScheduleTellRepeatedly(
-        TimeSpan.FromMilliseconds(250),
-        TimeSpan.FromMilliseconds(250),
-        Self,
-        new GatherMetrics(),
-        Self,
-        _cancelPublishing);
+      Context.System.Scheduler.ScheduleTellRepeatedly(TimeSpan.FromMilliseconds(250), TimeSpan.FromMilliseconds(250), Self, new GatherMetrics(), Self, _cancelPublishing);
     }
 
     protected override void PostStop()

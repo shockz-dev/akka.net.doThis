@@ -122,9 +122,12 @@ namespace ChartApp.Actors
 
     private void HandleMetrics(Metric metric)
     {
-      if (!string.IsNullOrEmpty(metric.Series) && !_seriesIndex.ContainsKey(metric.Series))
+      if (!string.IsNullOrEmpty(metric.Series) && _seriesIndex.ContainsKey(metric.Series))
       {
         var series = _seriesIndex[metric.Series];
+
+        if (series.Points == null) return;
+
         series.Points.AddXY(xPosCounter++, metric.CounterValue);
 
         while (series.Points.Count > MaxPoints)
