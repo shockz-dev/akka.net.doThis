@@ -1,4 +1,5 @@
 ﻿using Akka.Actor;
+using Akka.Event;
 
 using Octokit;
 
@@ -48,7 +49,7 @@ namespace GithubActors.Actors
     public GithubWorkerActor(Func<IGitHubClient> gitHubClientFactory)
     {
       _gitHubClientFactory = gitHubClientFactory;
-      InitialReceves();
+      InitialReceives();
     }
 
     protected override void PreStart()
@@ -56,13 +57,14 @@ namespace GithubActors.Actors
       _gitHubClient = _gitHubClientFactory();
     }
 
-    private void InitialReceves()
+    private void InitialReceives()
     {
       Receive<RetryableQuery>(query => query.Query is QueryStarrer, query =>
       {
         var starrer = (query.Query as QueryStarrer).Login;
 
         var sender = Sender;
+
         _gitHubClient.Activity.Starring.GetAllForUser(starrer).ContinueWith<object>(tr =>
         {
           if (tr.IsFaulted || tr.IsCanceled)
