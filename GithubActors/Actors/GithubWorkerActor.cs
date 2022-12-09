@@ -61,35 +61,33 @@ namespace GithubActors.Actors
       Receive<RetryableQuery>(query => query.Query is QueryStarrer, query =>
       {
         var starrer = (query.Query as QueryStarrer).Login;
-        try
-        {
-          var getStarrer = _gitHubClient.Activity.Starring.GetAllForUser(starrer);
 
-          getStarrer.Wait();
-          var starredRepos = getStarrer.Result;
-          Sender.Tell(new StarredReposForUser(starrer, starredRepos));
-        }
-        catch (Exception)
+        var sender = Sender;
+        _gitHubClient.Activity.Starring.GetAllForUser(starrer).ContinueWith<object>(tr =>
         {
-          Sender.Tell(query.NextTry());
-        }
+          if (tr.IsFaulted || tr.IsCanceled)
+          {
+            return query.NextTry();
+          }
+
+          return new StarredReposForUser(starrer, tr.Result);
+        }).PipeTo(sender);
       });
 
       Receive<RetryableQuery>(query => query.Query is QueryStarrers, query =>
       {
         var starrers = (query.Query as QueryStarrers).Key;
-        try
-        {
-          var getStars = _gitHubClient.Activity.Starring.GetAllStargazers(starrers.Owner, starrers.Repo);
 
-          getStars.Wait();
-          var stars = getStars.Result;
-          Sender.Tell(stars.ToArray());
-        }
-        catch (Exception)
+        var sender = Sender;
+        _gitHubClient.Activity.Starring.GetAllStargazers(starrers.Owner, starrers.Repo).ContinueWith<object>(tr =>
         {
-          Sender.Tell(query.NextTry());
-        }
+          if (tr.IsFaulted || tr.IsCanceled)
+          {
+            return query.NextTry();
+          }
+
+          return tr.Result.ToArray();
+        }).PipeTo(sender);
       });
     }
   }
